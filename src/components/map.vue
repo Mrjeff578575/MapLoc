@@ -1,6 +1,6 @@
 <template>
     <div class="map-con">
-        <div class="v-modal" :class="{none: displayNone}"></div>
+        <div class="v-modal" :class="{'modal-active': showModal}"></div>
         <div id="allmap"></div>
         <topbar></topbar>
         <el-dialog
@@ -21,19 +21,25 @@
 import mapHelper from '../helper/mapHelper'
 import topbar from './topBar'
 
+import { mapState } from 'vuex'
+
+const mockPath = 'http://localhost:2017/'
+
 export default {
   data () {
     return {
       dialogVisible: false, 
       msg: 'Welcome to Your Vue.js App',
       activeName: '',
-      markerTitle: 'This is a marker',
-      displayNone: false
+      markerTitle: 'This is a marker'
     }
   },
   components: {
     topbar: topbar
   },
+  computed: mapState({
+    showModal: state => state.common.showModal
+  }),
   mounted: function() {
     this.getMakerList()
     this.mapHelper = new mapHelper({
@@ -43,6 +49,7 @@ export default {
       pos: [116.480983, 39.989628],
       id: '1'
     }, this.bindEventToMarker)
+    this.$store.dispatch('initMapHelper', {mapHelper: this.mapHelper})
   },
   destroyed: function() {
     this.mapHelper.destroy()
@@ -50,16 +57,17 @@ export default {
   methods: {
     getMakerList() {
       const me = this
-      this.$http.get('http://localhost:2017/marker.json')
+      this.$http.get(mockPath + 'marker.json')
         .then((res) => {
             console.log(res.data)
+            me.$store.dispatch('initMarkerList', {markerList: res.data.item})
         }).catch((err) => {
             me.$message('oops, there is a error');
             console.log(err);
       })
     },
     getMakerInfo(markerId, cb) {
-      this.$http.get('http://localhost:2017/marker.json?markerId' + markerId)
+      this.$http.get(mockPath + 'marker.json?markerId' + markerId)
         .then((res) => {
             cb(null, res)
         }).catch((err) => {
@@ -108,7 +116,7 @@ export default {
 .map-con{
     height: 100%;
 
-    .none {
+    .modal-active {
       z-index: 199;
     }
 

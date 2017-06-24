@@ -4,6 +4,7 @@ import _ from 'lodash'
 export default class mapHelper {
     constructor(option) {
         this.mapStyle = option.mapStyle
+        this.mapMarkerList = [];
         console.log(option)
     }
     drawMap() {
@@ -58,9 +59,16 @@ export default class mapHelper {
             });
             marker.setExtData(markerObj)
             marker.setMap(me.map)
+            me.mapMarkerList.push(marker)
             cb(marker)
         }).catch((err) => {
             console.log(err)
+        })
+    }
+
+    getMapMakerById(id) {
+        return _.find(this.mapMarkerList, (marker) => {
+            return marker.getExtData().id == id
         })
     }
 

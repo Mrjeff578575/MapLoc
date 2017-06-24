@@ -33,6 +33,9 @@
     </div>
 </template>
 <script>
+import {mapState} from 'vuex'
+import _ from 'lodash'
+
 export default {
   data() {
     return {
@@ -42,15 +45,35 @@ export default {
         searchCollecion: ''
     }
   },
+  computed: mapState({
+    markerList: state => state.common.markerList,
+    mapHelper: state => state.common.mapHelper
+  }),
   methods: {
     handleSelect() {
-        console.log(this.searchVal)
+        const me = this
+        this.$store.dispatch('changeModalStatus')
+        //find which marker will be hightlight
+        const searchVal = _.find(this.searchCollecion, (item) => {
+            return item.value == me.searchVal
+        })
+        const resultMarker =  _.find(this.markerList, (marker) => {
+            return marker.id == searchVal.id
+        })
+        me.highLightMarker(resultMarker)
+        console.log(resultMarker)
     },
     handleClick() {
         console.log(this.activeName)
     },
     openDropDown() {
         this.dialogVisible = true
+    },
+    highLightMarker(marker) {
+        //get marker object
+        const hlMarker = this.mapHelper.getMapMakerById(marker.id)
+        //define marker's behavior
+        console.log(hlMarker)
     },
     handleClose(done) {
       this.$confirm('确认关闭？')
@@ -60,14 +83,13 @@ export default {
         .catch(_ => {})
     },
     querySearchAsync(queryString, cb) {
+        const me = this;
+        this.$store.dispatch('changeModalStatus')
         var restaurants = this.searchCollecion;
         var results = queryString ? restaurants.filter(this.createStateFilter(queryString)) : restaurants;
         clearTimeout(this.timeout);
         this.timeout = setTimeout(() => {
             cb(results);
-            //highlighy marker 
-            //add mask
-            //
         }, 3000 * Math.random());
     },
     createStateFilter(queryString) {
@@ -77,7 +99,7 @@ export default {
     },
     loadSearchCollection() {
       return [
-                { "value": "三全鲜食（北新泾店）", "address": "长宁区新渔路144号" },
+                { "value": "三全鲜食（北新泾店）", "id": '1', "address": "长宁区新渔路144号" },
                 { "value": "Hot honey 首尔炸鸡（仙霞路）", "address": "上海市长宁区淞虹路661号" },
                 { "value": "新旺角茶餐厅", "address": "上海市普陀区真北路988号创邑金沙谷6号楼113" },
                 { "value": "泷千家(天山西路店)", "address": "天山西路438号" }
