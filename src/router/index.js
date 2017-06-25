@@ -10,7 +10,6 @@ import map from '@/components/map'
 Vue.use(Router)
 
 let router =  new Router({
-  mode: 'history',
   routes: [{path: '/', name: 'map', component: map },
            {path: '/home', component: home },
     {
