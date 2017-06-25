@@ -1,8 +1,11 @@
 <template>
-    <div class="top-con">
+    <div>
+        <div class="top-con">
         <el-button-group>
             <el-button type="primary" icon="edit"></el-button>
             <el-autocomplete
+                popper-class="marker-autocomplete"
+                custom-item="marker-autocomplete"
                 v-model="searchVal"
                 :fetch-suggestions="querySearchAsync"
                 placeholder="请输入查询点"
@@ -13,36 +16,62 @@
             </el-autocomplete>
             <el-button type="primary" icon="arrow-down" @click="openDropDown"></el-button>
         </el-button-group>
+        </div>
         <el-dialog
-          title="地图设置"
-          :visible.sync="dialogVisible"
-          size="tiny"
-          custom-class="map-dialog slideInDown"
-          :before-close="handleClose">
-          <el-tabs v-model="activeName" @tab-click="handleClick">
-            <el-tab-pane label="用户管理" name="first">用户管理</el-tab-pane>
-            <el-tab-pane label="配置管理" name="second">配置管理</el-tab-pane>
-            <el-tab-pane label="角色管理" name="third">角色管理</el-tab-pane>
-            <el-tab-pane label="定时任务补偿" name="fourth">定时任务补偿</el-tab-pane>
-          </el-tabs>
-          <span slot="footer" class="dialog-footer">
+            title="地图设置"
+            :visible.sync="dialogVisible"
+            size="tiny"
+            custom-class="map-dialog slideInDown"
+            :before-close="handleClose">
+            <el-tabs v-model="activeName" @tab-click="handleClick">
+                <el-tab-pane label="用户管理" name="first">用户管理</el-tab-pane>
+                <el-tab-pane label="配置管理" name="second">配置管理</el-tab-pane>
+                <el-tab-pane label="角色管理" name="third">角色管理</el-tab-pane>
+            </el-tabs>
+            <span slot="footer" class="dialog-footer">
             <el-button @click="dialogVisible = false">取 消</el-button>
             <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
-          </span>
+            </span>
         </el-dialog>
     </div>
+
 </template>
 <script>
+import Vue from 'vue'
 import {mapState} from 'vuex'
 import _ from 'lodash'
+
+Vue.component('marker-autocomplete', {
+    functional: true,
+    render: function (h, ctx) {
+        const item = ctx.props.item;
+        return h('li', ctx.data, [
+            h('div', { 
+                attrs: { 
+                    class: 'name' 
+                } 
+            }, [item.name]),
+            h('span', { 
+                attrs: { 
+                    class: 'label' 
+                } 
+            }, [item.label])
+        ]);
+    },
+    props: {
+        item: { 
+            type: Object, 
+            required: true 
+        }
+    }
+});
 
 export default {
   data() {
     return {
         dialogVisible: false, 
         searchVal: '',
-        activeName: 'first',
-        searchCollecion: ''
+        activeName: 'first'
     }
   },
   computed: mapState({
@@ -50,18 +79,14 @@ export default {
     mapHelper: state => state.common.mapHelper
   }),
   methods: {
-    handleSelect() {
+    handleSelect(selectVal) {
         const me = this
         this.$store.dispatch('changeModalStatus')
         //find which marker will be hightlight
-        const searchVal = _.find(this.searchCollecion, (item) => {
-            return item.value == me.searchVal
-        })
         const resultMarker =  _.find(this.markerList, (marker) => {
-            return marker.id == searchVal.id
+            return marker.id == selectVal.id
         })
         me.highLightMarker(resultMarker)
-        console.log(resultMarker)
     },
     handleClick() {
         console.log(this.activeName)
@@ -73,22 +98,21 @@ export default {
         //get marker object
         const hlMarker = this.mapHelper.getMapMakerById(marker.id)
         //define marker's behavior
-        console.log(hlMarker)
+        hlMarker.setAnimation('AMAP_ANIMATION_BOUNCE')
+        setTimeout(_ => {
+            hlMarker.setAnimation('AMAP_ANIMATION_NONE')
+        }, 3000)
+        this.mapHelper.setMapZoomAndCenter(undefined, hlMarker.getPosition())
     },
     handleClose(done) {
-      this.$confirm('确认关闭？')
-        .then(_ => {
-          done()
-        })
-        .catch(_ => {})
+        
     },
     querySearchAsync(queryString, cb) {
         const me = this;
         this.$store.dispatch('changeModalStatus')
-        var restaurants = this.searchCollecion;
-        var results = queryString ? restaurants.filter(this.createStateFilter(queryString)) : restaurants;
+        const results = queryString ? this.markerList.filter(this.createStateFilter(queryString)) : this.markerList;
         clearTimeout(this.timeout);
-        this.timeout = setTimeout(() => {
+        this.timeout = setTimeout(_ => {
             cb(results);
         }, 3000 * Math.random());
     },
@@ -98,32 +122,46 @@ export default {
         };
     },
     loadSearchCollection() {
-      return [
-                { "value": "三全鲜食（北新泾店）", "id": '1', "address": "长宁区新渔路144号" },
-                { "value": "Hot honey 首尔炸鸡（仙霞路）", "address": "上海市长宁区淞虹路661号" },
-                { "value": "新旺角茶餐厅", "address": "上海市普陀区真北路988号创邑金沙谷6号楼113" },
-                { "value": "泷千家(天山西路店)", "address": "天山西路438号" }
-            ]
+      return this.markerList
     }
-  },
-  mounted() {
-      this.searchCollecion = this.loadSearchCollection()
   }
 }
 </script>
-<style>
-.top-con {
-    width: 100%;
-    position: absolute;
-    top: 10px;
-    z-index: 200;
+<style lang = 'scss'>
+body {
+    .marker-autocomplete {
+        li {
+            line-height: normal;
+            padding: 7px;
+
+            .name {
+            text-overflow: ellipsis;
+            overflow: hidden;
+            }
+            .label {
+            font-size: 12px;
+            color: #b4b4b4;
+            }
+
+            .highlighted .addr {
+            color: #ddd;
+            }
+        }
+    }
+    .top-con {
+        width: 100%;
+        position: absolute;
+        top: 10px;
+        z-index: 200;
+    }
+    .top-autocomplete {
+        width: 70%;
+        float: left;
+    }
+    .el-button-group {
+        width: 100%;
+        padding-left: 20px;
+    }
 }
-.top-autocomplete {
-    width: 70%;
-    float: left;
-}
-.el-button-group {
-    width: 100%;
-    padding-left: 20px;
-}
+
 </style>

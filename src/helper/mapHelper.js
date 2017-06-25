@@ -31,11 +31,16 @@ export default class mapHelper {
         return this
     }
     _onLocComplete(data) {
-        this.map.setZoomAndCenter({
-            zoomLevel: 17,
-            center: data.LngLat
-        })
+        this.setMapZoomAndCenter(17, data.LngLat)
         this._getMarkerByLngLat(data.LngLat)
+    }
+
+    setMapZoomAndCenter(zoom = 17, centerPos) {
+        if (!centerPos) {
+            console.warn('please input center pos')
+            return;
+        }
+        this.map.setZoomAndCenter(zoom, centerPos)
     }
 
     _getMarkerByLngLat(LngLat) {
@@ -115,12 +120,13 @@ export default class mapHelper {
         const image = 'static/img/logo.png'
         const title = 'this is a custom info window'
         const content = 'This is a custom info window text'
-        console.log(markerData)
+        const maskImage = 'static/img/timg.jpeg'
         template('infoWindow', function(compileTemp) {
             const context = {
                 image,
                 title,
-                content
+                content,
+                maskImage
             }
             const html = compileTemp(context)
             resolve(html)

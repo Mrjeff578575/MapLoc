@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 //components
-import hello from '@/components/Hello'
 import home from '@/components/Home'
 import device from '@/components/device'
 import login from '@/components/login'

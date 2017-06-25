@@ -20,10 +20,11 @@
 <script>
 import mapHelper from '../helper/mapHelper'
 import topbar from './topBar'
+import _ from 'lodash'
 
 import { mapState } from 'vuex'
 
-const mockPath = 'http://localhost:2017/'
+const mockPath = './static/mock/'
 
 export default {
   data () {
@@ -41,25 +42,28 @@ export default {
     showModal: state => state.common.showModal
   }),
   mounted: function() {
-    this.getMakerList()
+    const me = this
     this.mapHelper = new mapHelper({
       mapStyle: 'amap://styles/fresh'
     })
-    this.mapHelper.drawMap().addMarker({
-      pos: [116.480983, 39.989628],
-      id: '1'
-    }, this.bindEventToMarker)
+    this.mapHelper.drawMap()
+    this.getMakerList((markerList) => {
+      _.each(markerList, (marker) => {
+        me.mapHelper.addMarker(marker, me.bindEventToMarker)
+      })
+    })
     this.$store.dispatch('initMapHelper', {mapHelper: this.mapHelper})
   },
   destroyed: function() {
     this.mapHelper.destroy()
   },
   methods: {
-    getMakerList() {
+    getMakerList(cb) {
       const me = this
       this.$http.get(mockPath + 'marker.json')
         .then((res) => {
             console.log(res.data)
+            cb(res.data.item)
             me.$store.dispatch('initMarkerList', {markerList: res.data.item})
         }).catch((err) => {
             me.$message('oops, there is a error');
@@ -116,6 +120,12 @@ export default {
 .map-con{
     height: 100%;
 
+    .map-dialog{
+      width: 90%
+    }
+    .el-message-box{
+      width: 50%;
+    }
     .modal-active {
       z-index: 199;
     }
@@ -163,8 +173,6 @@ export default {
     .mask {
       position: absolute;
       top: 0;
-      background: url('../assets/timg.jpeg');
-      background-size: cover;
       filter: blur(3px);
       width: 100%;
       height: 100%;
@@ -176,12 +184,5 @@ export default {
     margin: 0 auto;
 }
 /* element style*/
-
-.map-dialog{
-  width: 90%
-}
-.el-message-box{
-  width: 50%;
-}
 
 </style>
