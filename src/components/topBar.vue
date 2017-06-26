@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="top-root">
         <div class="top-con">
         <el-button-group>
             <el-button type="primary" icon="edit"></el-button>
@@ -22,6 +22,8 @@
             :visible.sync="dialogVisible"
             size="tiny"
             custom-class="map-dialog slideInDown"
+            :modal=false
+            @open="onOpenSetting"
             :before-close="handleClose">
             <el-tabs v-model="activeName" @tab-click="handleClick">
                 <el-tab-pane label="用户管理" name="first">用户管理</el-tab-pane>
@@ -40,6 +42,7 @@
 import Vue from 'vue'
 import {mapState} from 'vuex'
 import _ from 'lodash'
+import html2canvas from 'html2canvas'
 
 Vue.component('marker-autocomplete', {
     functional: true,
@@ -94,6 +97,23 @@ export default {
     openDropDown() {
         this.dialogVisible = true
     },
+    onOpenSetting() {
+        html2canvas(document.querySelector('#allmap')).then((canvas) => {
+            const src = canvas.toDataURL('image/png')
+            const mapDialog = document.querySelector('.map-dialog')
+            const parentNode = document.querySelector('.top-root > .el-dialog__wrapper')
+            const imageMask = document.createElement('div')
+            imageMask.className += "imageMask"
+            imageMask.setAttribute('style', 'position: absolute;top: 15%;left: 5%;filter: blur(3px);background-position: 5% 30%;')
+            imageMask.style.backgroundImage = 'url('+src+')'
+            imageMask.style.width = mapDialog.clientWidth + 'px'
+            imageMask.style.height = mapDialog.clientHeight + 'px'
+            mapDialog.style.zIndex = '99'
+            //imageMask.style.background = 'inherit'
+            parentNode.appendChild(imageMask)
+        })
+    },
+
     highLightMarker(marker) {
         //get marker object
         const hlMarker = this.mapHelper.getMapMakerById(marker.id)
@@ -105,7 +125,7 @@ export default {
         this.mapHelper.setMapZoomAndCenter(undefined, hlMarker.getPosition())
     },
     handleClose(done) {
-        
+        done()
     },
     querySearchAsync(queryString, cb) {
         const me = this;

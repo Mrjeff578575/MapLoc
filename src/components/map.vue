@@ -97,6 +97,7 @@ export default {
           }
           me.mapHelper.addInfoWindow(e.target, res, {
             afterOpen() {
+
             }
           })
         }
@@ -105,6 +106,7 @@ export default {
       console.log(e.target.getExtData())
     },
     handleClose(done) {
+      done()
       // this.$confirm('确认关闭？')
       //   .then(_ => {
       //     done()
@@ -121,7 +123,8 @@ export default {
     height: 100%;
 
     .map-dialog{
-      width: 90%
+      width: 90%;
+      background: transparent
     }
     .el-message-box{
       width: 50%;
