@@ -100,14 +100,30 @@ export default class mapHelper {
 
     addInfoWindow(marker, markerData, options) {
         const me = this
-        const createInfoWindow = new Promise(this.createCustomInfoWindow.bind(this, markerData))
+        let createInfoWindow = new Promise(this.createCustomInfoWindow.bind(this, markerData))
         createInfoWindow.then((res) => {
+            let deviceWidth = document.body.clientWidth
+            console.log(deviceWidth)
+            let offset = [];
+            switch (deviceWidth) {
+                case '375': 
+                //Iphone6
+                    offset = [190, 200]
+                    break
+                case '414':
+                //Iphone6 Plus
+                    offset = [200, 250]
+                    break
+                default:
+                    offset = [190, 200]
+                    break
+            }
             const infoWindow = new AMap.InfoWindow({
                 isCustom: true,
                 autoMove: true,
                 content: res,
                 closeWhenClickMap: true,
-                offset: new AMap.Pixel(16, -55)
+                offset: new AMap.Pixel(offset[0], offset[1])
             })
             infoWindow.open(me.map, marker.getPosition());
             AMap.event.addListener(infoWindow, 'open', options.afterOpen.call(null));

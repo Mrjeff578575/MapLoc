@@ -121,6 +121,23 @@ export default {
 
 .map-con{
     height: 100%;
+    /* Iphone6 */
+    @media screen and (min-width: 375px) {
+      .info-window {
+        width: 300px;
+        height: 400px;
+      }
+    }
+    /* Iphone6 Plus */
+    @media screen and (min-width: 414px) {
+      .info-window {
+        width: 320px;
+        height: 500px;
+      }
+      .info-bottom {
+        top: 48% !important;
+      }
+    }
 
     .map-dialog{
       width: 90%;
@@ -168,9 +185,10 @@ export default {
       position: absolute;
       width: 100%;
       height: 30px;
+      left: -20px;
+      top: 35%;
       background: url('../assets/sharp.png');
       background-repeat: no-repeat;
-      background-position: 120px;
     }
 
     .mask {
