@@ -1,4 +1,5 @@
 import template from '../mapTemplate/template'
+import $ from 'Jquery'
 import _ from 'lodash'
 
 export default class mapHelper {
@@ -56,13 +57,20 @@ export default class mapHelper {
     */
     addMarker(markerObj, cb) {
         const me = this;
-        const createCustomMarker = new Promise(this.createCustomMarker.bind(this))
+        const createCustomMarker = new Promise(this.createCustomMarker.bind(this, markerObj.msgNum))
         createCustomMarker.then((res) => {
             const marker = new AMap.Marker({
                 position: markerObj.pos,
                 content: res
             });
-            marker.setExtData(markerObj)
+            marker.setExtData(_.extend(markerObj, {
+                refreshMsgNum: (msgNum) => {
+                    const maxMsgNum = 10
+                    msgNum = msgNum > maxMsgNum ? maxMsgNum + '+'  : msgNum
+                    //TODO
+                    $('.msg-num').html(msgNum) 
+                }
+            }))
             marker.setMap(me.map)
             me.mapMarkerList.push(marker)
             cb(marker)
@@ -85,11 +93,14 @@ export default class mapHelper {
         console.log('1')
     }
 
-    createCustomMarker(resolve, reject) {
+    createCustomMarker(msgNum, resolve, reject) {
         const imgSrc = 'static/img/logo.png'
+        const maxMsgNum = 10
+        msgNum = msgNum > maxMsgNum ? maxMsgNum + '+'  : msgNum
         template('marker', function(compileTemp) {
             const context = {
-                imgSrc
+                imgSrc,
+                msgNum
             }
             const html = compileTemp(context)
             resolve(html)

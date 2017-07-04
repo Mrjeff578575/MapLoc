@@ -104,6 +104,9 @@ export default {
       })
       //this.dialogVisible = true
       console.log(e.target.getExtData())
+      //test RefreshMsgNum Funtion
+      let markerExtData = e.target.getExtData()
+      markerExtData.refreshMsgNum(9)
     },
     handleClose(done) {
       done()
