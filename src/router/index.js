@@ -1,29 +1,19 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 //components
-import home from '@/components/Home'
-import device from '@/components/device'
+//import device from '@/components/device'
 import login from '@/components/login'
 import user from '@/components/user'
 import map from '@/components/map'
+import register from '@/components/register'
 
 Vue.use(Router)
 
 let router =  new Router({
-  routes: [{path: '/', name: 'map', component: map },
-           {path: '/home', component: home },
-    {
-      path: '/device',
-      component: device
-    },
-    {
-      path: '/user',
-      component: user
-    },
-    {
-      path: '/map',
-      component: map
-    }
+  routes: [
+    {path: '/user',component: user},
+    {path: '/map',component: map},
+    {path: '/', component: map}
   ]
 })
 router.beforeEach((to, from, next) => {
@@ -31,4 +21,8 @@ router.beforeEach((to, from, next) => {
   next();
   //TODO 对用户登录状态进行判断，如果未登录直接跳转到login
 })
+
+function checkUserLogin() {
+
+}
 export default router

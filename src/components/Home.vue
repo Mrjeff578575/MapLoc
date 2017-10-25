@@ -27,9 +27,6 @@ export default {
   overflow: hidden;
 }
 .pagebox{
-    // position: absolute;
-    // top: 0;
-    // left: -9999px;
     width: 100%;
     height: 100%;
 }

@@ -23,8 +23,8 @@ module.exports = {
     alias: {
       'vue$': 'vue/dist/vue.esm.js',
       '@': resolve('src'),
-      'handlebars': 'handlebars/dist/handlebars.min.js',
-      'Jquery': resolve('static/js/jquery-2.1.3.js')
+      'jquery': resolve('static/js/jquery-3.2.1.min.js'),
+      'handlebars': 'handlebars/dist/handlebars.min.js'
     }
   },
   module: {
